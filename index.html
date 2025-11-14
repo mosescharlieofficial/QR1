@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pdf-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            padding: 8px 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #d9534f;
+            padding: 20px;
+        }
+        
+        .error h2 {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pdf-container">
+            <div class="loading" id="loading">Loading PDF...</div>
+            <div class="error" id="error" style="display: none;">
+                <h2>PDF Not Found</h2>
+                <p>The PDF file "Atmospheric Instrumentation.pdf" could not be loaded.</p>
+                <p>Please make sure the file exists in your repository.</p>
+            </div>
+            <iframe 
+                class="pdf-viewer" 
+                id="pdfViewer" 
+                src="Atmospheric Instrumentation.pdf" 
+                style="display: none;"
+                onload="pdfLoaded()"
+                onerror="pdfError()">
+            </iframe>
+        </div>
+        
+        <div class="controls">
+            <button onclick="enterFullscreen()">Full Screen</button>
+            <button onclick="refreshPDF()">Refresh</button>
+        </div>
+    </div>
+
+    <script>
+        function pdfLoaded() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('pdfViewer').style.display = 'block';
+        }
+        
+        function pdfError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+        
+        function enterFullscreen() {
+            const elem = document.getElementById('pdfViewer');
+            
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+        
+        function refreshPDF() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('pdfViewer').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            const pdfViewer = document.getElementById('pdfViewer');
+            const currentSrc = pdfViewer.src;
+            pdfViewer.src = '';
+            setTimeout(() => {
+                pdfViewer.src = currentSrc;
+            }, 100);
+        }
+        
+        // Auto-hide controls after 5 seconds
+        let controlsTimeout;
+        function hideControls() {
+            const controls = document.querySelector('.controls');
+            controls.style.opacity = '0';
+            controls.style.pointerEvents = 'none';
+        }
+        
+        function showControls() {
+            const controls = document.querySelector('.controls');
+            controls.style.opacity = '1';
+            controls.style.pointerEvents = 'auto';
+            
+            clearTimeout(controlsTimeout);
+            controlsTimeout = setTimeout(hideControls, 5000);
+        }
+        
+        // Initialize controls auto-hide
+        document.addEventListener('mousemove', showControls);
+        controlsTimeout = setTimeout(hideControls, 5000);
+    </script>
+</body>
+</html>
